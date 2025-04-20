@@ -1,18 +1,34 @@
 
+import { useEffect, useState } from "react";
 import { FileText, Clock, CheckCircle2, FileBarChart } from "lucide-react";
 import Layout from "@/components/layout/Layout";
-import { departments, mockRequests } from "@/data/mockData";
+import { departments } from "@/data/mockData";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Request } from "@/types";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [requests, setRequests] = useState<Request[]>([]);
+  
+  // Load requests from localStorage on component mount
+  useEffect(() => {
+    const savedRequests = localStorage.getItem('requests');
+    if (savedRequests) {
+      setRequests(JSON.parse(savedRequests));
+    }
+  }, []);
 
-  const totalRequests = mockRequests.length;
-  const pendingRequests = mockRequests.filter(req => req.status === "Pending").length;
-  const inProgressRequests = mockRequests.filter(req => req.status === "In progress").length;
-  const completedRequests = mockRequests.filter(req => req.status === "Completed").length;
+  const totalRequests = requests.length;
+  const pendingRequests = requests.filter(req => req.status === "Pending").length;
+  const inProgressRequests = requests.filter(req => req.status === "In progress").length;
+  const completedRequests = requests.filter(req => req.status === "Completed").length;
+
+  // Get request counts per department
+  const getRequestCountByDepartment = (departmentName: string) => {
+    return requests.filter(req => req.department === departmentName).length;
+  };
 
   return (
     <Layout title="Dashboard">
@@ -88,7 +104,7 @@ const Dashboard = () => {
                     <span className="ml-3">{dept.name}</span>
                   </div>
                   <span className="bg-accent h-8 w-8 rounded-full flex items-center justify-center">
-                    {dept.requestCount}
+                    {getRequestCountByDepartment(dept.name)}
                   </span>
                 </div>
               ))}
@@ -104,9 +120,9 @@ const Dashboard = () => {
               </Link>
             </div>
             
-            {mockRequests.length > 0 ? (
+            {requests.length > 0 ? (
               <div className="space-y-4">
-                {mockRequests.map((request) => (
+                {requests.slice(0, 3).map((request) => (
                   <div key={request.id} className="border border-border rounded-md p-4">
                     <div className="flex justify-between mb-2">
                       <span className="font-medium">{request.title}</span>

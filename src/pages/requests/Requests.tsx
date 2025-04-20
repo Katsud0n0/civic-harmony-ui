@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Search, Trash2 } from "lucide-react";
@@ -7,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { Request } from "@/types";
+import { Request, RequestStatus } from "@/types";
 
 const Requests = () => {
   const [search, setSearch] = useState("");
@@ -56,8 +55,8 @@ const Requests = () => {
     }
   };
 
-  const handleStatusChange = (requestId: string, newStatus: string, requestCreator: string) => {
-    // Update the status of the request
+  const handleStatusChange = (requestId: string, newStatus: RequestStatus, requestCreator: string) => {
+    // Update the status of the request with proper type
     const updatedRequests = requests.map(request => {
       if (request.id === requestId) {
         return { ...request, status: newStatus };
@@ -130,7 +129,7 @@ const Requests = () => {
                       <div className="relative inline-block">
                         <Select 
                           defaultValue={request.status} 
-                          onValueChange={(value) => handleStatusChange(request.id, value, request.createdBy)}
+                          onValueChange={(value) => handleStatusChange(request.id, value as RequestStatus, request.createdBy)}
                         >
                           <SelectTrigger className={`
                             border-none shadow-none font-medium text-sm
