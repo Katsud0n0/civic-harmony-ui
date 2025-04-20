@@ -15,7 +15,6 @@ const Requests = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Load requests from localStorage on component mount
   useEffect(() => {
     const savedRequests = localStorage.getItem('requests');
     if (savedRequests) {
@@ -34,12 +33,10 @@ const Requests = () => {
   });
 
   const handleDelete = (requestId: string, requestCreator: string) => {
-    // Only allow deletion if the current user created the request
     if (user?.username === requestCreator) {
       const updatedRequests = requests.filter(request => request.id !== requestId);
       setRequests(updatedRequests);
       
-      // Update localStorage
       localStorage.setItem('requests', JSON.stringify(updatedRequests));
       
       toast({
@@ -56,7 +53,6 @@ const Requests = () => {
   };
 
   const handleStatusChange = (requestId: string, newStatus: RequestStatus, requestCreator: string) => {
-    // Update the status of the request with proper type
     const updatedRequests = requests.map(request => {
       if (request.id === requestId) {
         return { ...request, status: newStatus };
@@ -66,7 +62,6 @@ const Requests = () => {
     
     setRequests(updatedRequests);
     
-    // Update localStorage
     localStorage.setItem('requests', JSON.stringify(updatedRequests));
   };
 

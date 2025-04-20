@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -12,10 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { departments } from "@/data/mockData";
 import { Department, Request } from "@/types";
 
-// Generate a unique ID for new requests
 const generateId = () => `REQ-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
 
-// Get current date in readable format
 const getCurrentDate = () => {
   const date = new Date();
   return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${date.getFullYear()}`;
@@ -45,7 +42,6 @@ const NewRequest = () => {
 
     setIsSubmitting(true);
 
-    // Create new request object with user input
     const newRequest: Request = {
       id: generateId(),
       title,
@@ -57,16 +53,10 @@ const NewRequest = () => {
       assignedTo: ""
     };
 
-    // Get existing requests from localStorage or initialize empty array
     const existingRequests = JSON.parse(localStorage.getItem('requests') || '[]');
-    
-    // Add new request to array
     const updatedRequests = [...existingRequests, newRequest];
-    
-    // Save updated requests to localStorage
     localStorage.setItem('requests', JSON.stringify(updatedRequests));
 
-    // Simulate API request delay
     setTimeout(() => {
       toast({
         title: "Request created",

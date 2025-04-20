@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { FileText, Clock, CheckCircle2, FileBarChart } from "lucide-react";
 import Layout from "@/components/layout/Layout";
@@ -12,7 +11,11 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<Request[]>([]);
   
-  // Load requests from localStorage on component mount
+  // SQLITE INTEGRATION POINT:
+  // 1. Replace localStorage with a GET request to your SQLite backend
+  // 2. Create an API endpoint: GET /api/requests
+  // 3. Backend should query:
+  //    SELECT * FROM requests ORDER BY date_created DESC
   useEffect(() => {
     const savedRequests = localStorage.getItem('requests');
     if (savedRequests) {
