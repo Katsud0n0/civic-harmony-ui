@@ -2,16 +2,22 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { mockRequests } from "@/data/mockData";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import { exportRequestsToCSV } from "@/utils/exportUtils";
 
 const Requests = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [requests, setRequests] = useState(mockRequests);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const filteredRequests = mockRequests.filter((request) => {
+  const filteredRequests = requests.filter((request) => {
     const matchesSearch = search === "" || 
       request.title.toLowerCase().includes(search.toLowerCase()) || 
       request.id.toLowerCase().includes(search.toLowerCase());
@@ -20,6 +26,40 @@ const Requests = () => {
     
     return matchesSearch && matchesStatus;
   });
+
+  const handleDelete = (requestId: string, requestCreator: string) => {
+    // Only allow deletion if the current user created the request
+    if (user?.username === requestCreator) {
+      setRequests(requests.filter(request => request.id !== requestId));
+      toast({
+        title: "Request deleted",
+        description: "The request has been successfully deleted.",
+      });
+    } else {
+      toast({
+        title: "Permission denied",
+        description: "You can only delete requests that you've created.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExportToCSV = () => {
+    if (filteredRequests.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There are no requests matching your current filters.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    exportRequestsToCSV(filteredRequests);
+    toast({
+      title: "Export successful",
+      description: "Your requests have been exported to CSV format."
+    });
+  };
 
   return (
     <Layout title="Requests">
@@ -50,6 +90,15 @@ const Requests = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <Button 
+              variant="outline"
+              size="icon"
+              onClick={handleExportToCSV}
+              title="Export to CSV"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -98,7 +147,12 @@ const Requests = () => {
                       </div>
                     </td>
                     <td className="p-4 text-right">
-                      <Button variant="ghost" size="icon" className="text-destructive">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className={`text-destructive ${user?.username === request.createdBy ? '' : 'opacity-50'}`}
+                        onClick={() => handleDelete(request.id, request.createdBy)}
+                      >
                         <Trash2 className="h-5 w-5" />
                       </Button>
                     </td>

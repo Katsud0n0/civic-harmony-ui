@@ -1,7 +1,6 @@
 
 import Layout from "@/components/layout/Layout";
 import { departments } from "@/data/mockData";
-import { ChevronRight } from "lucide-react";
 
 const Departments = () => {
   return (
@@ -21,7 +20,6 @@ const Departments = () => {
                 <th className="text-left p-4">Department</th>
                 <th className="text-left p-4">Service Description</th>
                 <th className="text-center p-4">Requests</th>
-                <th className="text-right p-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -43,11 +41,6 @@ const Departments = () => {
                     <div className="inline-block bg-accent h-8 w-8 rounded-full flex items-center justify-center font-medium">
                       {dept.requestCount}
                     </div>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button className="text-jdPrimary hover:text-jdPrimary/80">
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
                   </td>
                 </tr>
               ))}

@@ -7,13 +7,80 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { User, Bell, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 const Settings = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [username, setUsername] = useState(user?.username || '');
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [email, setEmail] = useState(user?.email || '');
   const [department] = useState(user?.department || '');
+  
+  // Password fields
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Loading states
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handleSaveProfile = () => {
+    setSavingProfile(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully."
+      });
+      setSavingProfile(false);
+    }, 1000);
+  };
+
+  const handleUpdatePassword = () => {
+    if (!currentPassword) {
+      toast({
+        title: "Current password required",
+        description: "Please enter your current password.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation must match.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSavingPassword(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully."
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSavingPassword(false);
+    }, 1000);
+  };
 
   return (
     <Layout title="Settings">
@@ -110,8 +177,12 @@ const Settings = () => {
                     />
                   </div>
 
-                  <Button className="bg-jdPrimary hover:bg-jdPrimary/90">
-                    Save Changes
+                  <Button 
+                    className="bg-jdPrimary hover:bg-jdPrimary/90"
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile}
+                  >
+                    {savingProfile ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </div>
@@ -145,7 +216,9 @@ const Settings = () => {
                     <Label htmlFor="currentPassword">Current Password</Label>
                     <Input 
                       id="currentPassword" 
-                      type="password" 
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
                       className="bg-accent border-border"
                     />
                   </div>
@@ -155,6 +228,8 @@ const Settings = () => {
                     <Input 
                       id="newPassword" 
                       type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       className="bg-accent border-border" 
                     />
                   </div>
@@ -163,13 +238,19 @@ const Settings = () => {
                     <Label htmlFor="confirmPassword">Confirm New Password</Label>
                     <Input 
                       id="confirmPassword" 
-                      type="password" 
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="bg-accent border-border"
                     />
                   </div>
 
-                  <Button className="bg-jdPrimary hover:bg-jdPrimary/90">
-                    Update Password
+                  <Button 
+                    className="bg-jdPrimary hover:bg-jdPrimary/90"
+                    onClick={handleUpdatePassword}
+                    disabled={savingPassword}
+                  >
+                    {savingPassword ? "Updating..." : "Update Password"}
                   </Button>
                 </div>
               </div>

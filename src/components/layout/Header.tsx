@@ -1,5 +1,4 @@
 
-import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
@@ -26,10 +25,6 @@ const Header = ({ title }: HeaderProps) => {
             New Request
           </Button>
         </Link>
-        
-        <Button variant="ghost" size="icon" className="text-foreground">
-          <Bell className="h-5 w-5" />
-        </Button>
         
         <Link to="/profile" className="flex items-center">
           <Avatar className="h-8 w-8 bg-jdPrimary text-white">

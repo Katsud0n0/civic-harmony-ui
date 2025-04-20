@@ -12,6 +12,7 @@ import Home from "./pages/landing/Home";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Departments from "./pages/departments/Departments";
 import Requests from "./pages/requests/Requests";
+import NewRequest from "./pages/requests/NewRequest";
 import Profile from "./pages/profile/Profile";
 import Team from "./pages/team/Team";
 import Settings from "./pages/settings/Settings";
@@ -55,6 +56,11 @@ const AppRoutes = () => {
       <Route path="/requests" element={
         <ProtectedRoute>
           <Requests />
+        </ProtectedRoute>
+      } />
+      <Route path="/requests/new" element={
+        <ProtectedRoute>
+          <NewRequest />
         </ProtectedRoute>
       } />
       <Route path="/profile" element={
