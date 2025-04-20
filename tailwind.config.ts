@@ -52,6 +52,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// JD Framework specific colors
+				jdPrimary: '#9b87f5',
+				jdDark: '#1A1F2C',
+				jdBackground: '#161A23',
+				jdCard: '#1E2330',
+				jdSidebar: '#101219',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
