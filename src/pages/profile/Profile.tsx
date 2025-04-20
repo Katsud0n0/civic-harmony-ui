@@ -1,26 +1,52 @@
 
 import { useAuth } from "@/context/AuthContext";
+import { useState, useMemo } from "react";
 import Layout from "@/components/layout/Layout";
-import { mockRequests } from "@/data/mockData";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Profile = () => {
   const { user, logout } = useAuth();
-
+  const { toast } = useToast();
+  
+  // Form state for edit profile
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFullName, setEditFullName] = useState(user?.fullName || '');
+  const [editEmail, setEditEmail] = useState(user?.email || '');
+  const [editPhone, setEditPhone] = useState(user?.phone || '');
+  
+  // Get user requests from localStorage
   const userRequests = useMemo(() => {
-    return mockRequests.filter(req => req.createdBy === user?.username);
-  }, [user, mockRequests]);
+    const savedRequests = localStorage.getItem('requests');
+    if (savedRequests) {
+      const parsedRequests = JSON.parse(savedRequests);
+      return parsedRequests.filter((req: any) => req.createdBy === user?.username);
+    }
+    return [];
+  }, [user]);
 
   const totalRequests = userRequests.length;
-  const completedRequests = userRequests.filter(req => req.status === "Completed").length;
-  const pendingRequests = userRequests.filter(req => req.status === "Pending").length;
+  const completedRequests = userRequests.filter((req: any) => req.status === "Completed").length;
+  const pendingRequests = userRequests.filter((req: any) => req.status === "Pending").length;
 
   const getInitials = (name: string) => {
     return name ? name.charAt(0).toUpperCase() : 'U';
+  };
+
+  const handleSaveProfile = () => {
+    // Here we would typically update the user profile in the backend
+    // For now, just show a success message
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been successfully updated."
+    });
+    setIsEditing(false);
   };
 
   return (
@@ -67,9 +93,55 @@ const Profile = () => {
             </div>
             
             <div className="space-y-3 mt-6 pt-6 border-t border-border">
-              <Button className="w-full bg-accent hover:bg-accent/80">
-                <Pencil className="h-4 w-4 mr-2" /> Edit Profile
-              </Button>
+              <Dialog open={isEditing} onOpenChange={setIsEditing}>
+                <DialogTrigger asChild>
+                  <Button className="w-full bg-accent hover:bg-accent/80">
+                    <Pencil className="h-4 w-4 mr-2" /> Edit Profile
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-jdCard border-border">
+                  <DialogHeader>
+                    <DialogTitle>Edit Your Profile</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input 
+                        id="fullName" 
+                        value={editFullName}
+                        onChange={(e) => setEditFullName(e.target.value)}
+                        className="bg-accent border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        className="bg-accent border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input 
+                        id="phone" 
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        className="bg-accent border-border"
+                      />
+                    </div>
+                    <Button 
+                      className="w-full bg-jdPrimary hover:bg-jdPrimary/90 mt-2"
+                      onClick={handleSaveProfile}
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              
               <Link to="/settings">
                 <Button variant="outline" className="w-full">
                   Settings
@@ -112,7 +184,7 @@ const Profile = () => {
             
             {userRequests.length > 0 ? (
               <div className="space-y-4">
-                {userRequests.map((request) => (
+                {userRequests.map((request: any) => (
                   <div key={request.id} className="border-b border-border pb-4 last:border-0">
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="font-medium">{request.title}</h4>

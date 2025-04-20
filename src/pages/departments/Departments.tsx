@@ -1,8 +1,25 @@
 
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { departments } from "@/data/mockData";
+import { Request } from "@/types";
 
 const Departments = () => {
+  const [requests, setRequests] = useState<Request[]>([]);
+  
+  // Load requests from localStorage on component mount
+  useEffect(() => {
+    const savedRequests = localStorage.getItem('requests');
+    if (savedRequests) {
+      setRequests(JSON.parse(savedRequests));
+    }
+  }, []);
+
+  // Count requests per department
+  const getRequestCountByDepartment = (departmentName: string) => {
+    return requests.filter(req => req.department === departmentName).length;
+  };
+
   return (
     <Layout title="Departments">
       <div className="space-y-6">
@@ -39,7 +56,7 @@ const Departments = () => {
                   <td className="p-4 text-muted-foreground">{dept.description}</td>
                   <td className="p-4 text-center">
                     <div className="inline-block bg-accent h-8 w-8 rounded-full flex items-center justify-center font-medium">
-                      {dept.requestCount}
+                      {getRequestCountByDepartment(dept.name)}
                     </div>
                   </td>
                 </tr>

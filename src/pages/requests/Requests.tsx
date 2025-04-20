@@ -1,21 +1,28 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
-import { mockRequests } from "@/data/mockData";
-import { Search, Trash2, Download } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { exportRequestsToCSV } from "@/utils/exportUtils";
+import { Request } from "@/types";
 
 const Requests = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [requests, setRequests] = useState(mockRequests);
+  const [requests, setRequests] = useState<Request[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Load requests from localStorage on component mount
+  useEffect(() => {
+    const savedRequests = localStorage.getItem('requests');
+    if (savedRequests) {
+      setRequests(JSON.parse(savedRequests));
+    }
+  }, []);
 
   const filteredRequests = requests.filter((request) => {
     const matchesSearch = search === "" || 
@@ -30,7 +37,12 @@ const Requests = () => {
   const handleDelete = (requestId: string, requestCreator: string) => {
     // Only allow deletion if the current user created the request
     if (user?.username === requestCreator) {
-      setRequests(requests.filter(request => request.id !== requestId));
+      const updatedRequests = requests.filter(request => request.id !== requestId);
+      setRequests(updatedRequests);
+      
+      // Update localStorage
+      localStorage.setItem('requests', JSON.stringify(updatedRequests));
+      
       toast({
         title: "Request deleted",
         description: "The request has been successfully deleted.",
@@ -44,21 +56,19 @@ const Requests = () => {
     }
   };
 
-  const handleExportToCSV = () => {
-    if (filteredRequests.length === 0) {
-      toast({
-        title: "No data to export",
-        description: "There are no requests matching your current filters.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    exportRequestsToCSV(filteredRequests);
-    toast({
-      title: "Export successful",
-      description: "Your requests have been exported to CSV format."
+  const handleStatusChange = (requestId: string, newStatus: string, requestCreator: string) => {
+    // Update the status of the request
+    const updatedRequests = requests.map(request => {
+      if (request.id === requestId) {
+        return { ...request, status: newStatus };
+      }
+      return request;
     });
+    
+    setRequests(updatedRequests);
+    
+    // Update localStorage
+    localStorage.setItem('requests', JSON.stringify(updatedRequests));
   };
 
   return (
@@ -90,15 +100,6 @@ const Requests = () => {
                 </SelectContent>
               </Select>
             </div>
-            
-            <Button 
-              variant="outline"
-              size="icon"
-              onClick={handleExportToCSV}
-              title="Export to CSV"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
@@ -127,7 +128,10 @@ const Requests = () => {
                     <td className="p-4">{request.dateCreated}</td>
                     <td className="p-4">
                       <div className="relative inline-block">
-                        <Select defaultValue={request.status}>
+                        <Select 
+                          defaultValue={request.status} 
+                          onValueChange={(value) => handleStatusChange(request.id, value, request.createdBy)}
+                        >
                           <SelectTrigger className={`
                             border-none shadow-none font-medium text-sm
                             ${
@@ -139,9 +143,15 @@ const Requests = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="In progress">In progress</SelectItem>
-                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Pending">
+                              <span className="text-amber-500">Pending</span>
+                            </SelectItem>
+                            <SelectItem value="In progress">
+                              <span className="text-blue-500">In progress</span>
+                            </SelectItem>
+                            <SelectItem value="Completed">
+                              <span className="text-green-500">Completed</span>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -150,8 +160,9 @@ const Requests = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className={`text-destructive ${user?.username === request.createdBy ? '' : 'opacity-50'}`}
+                        className={`${user?.username === request.createdBy ? 'text-destructive' : 'text-destructive opacity-50'}`}
                         onClick={() => handleDelete(request.id, request.createdBy)}
+                        disabled={user?.username !== request.createdBy}
                       >
                         <Trash2 className="h-5 w-5" />
                       </Button>
